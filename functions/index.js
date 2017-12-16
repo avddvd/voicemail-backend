@@ -14,7 +14,22 @@ randomEl = (list)=>  {
     return list[i];
 }
 
-exports.getRandonName = functions.https.onRequest((req, res) => {
-	let randomName = randomEl(adjectives) + ' ' + randomEl(nouns) 
-	res.send(randomName)
+exports.addUserName = functions.https.onRequest((req, res) => {
+  const name = req.query.name
+  let names = {}
+  if ( name === undefined ) {
+    for (i = 0; i < 5; i++ ){
+ 	    let randomName = randomEl(adjectives) + ' ' + randomEl(nouns) 
+      names[i.toString()] = randomName
+    }
+	  res.send(names)
+  } else {
+	  // Push the new message into the Realtime Database using the Firebase Admin SDK.
+	  admin.database().ref('/usernames').push({username: name}).then(
+			snapshot => {
+	    // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
+	    	res.redirect(303, snapshot.ref)
+	  	}
+		)
+  }
 })
